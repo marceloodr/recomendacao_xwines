@@ -13,6 +13,7 @@ PROCESSED_DIR = ROOT / "data" / "processed"
 
 VERSIONS = ["Full", "Slim", "Test"]  # ordem de preferência quando há mais de uma baixada
 LIST_COLS = ["grapes", "harmonize", "vintages"]
+CAT_COLS = ["elaborate", "body", "acidity", "country", "region", "winery"]
 VALID_RATINGS = np.arange(1, 5.5, 0.5)
 ITEM_COLUMNS = {
     "WineID": "item_id", "WineName": "name", "Type": "type", "Elaborate": "elaborate",
@@ -78,12 +79,29 @@ def clean_items(items: pd.DataFrame, log: CleaningLog) -> pd.DataFrame:
     df = df[df["grapes"].map(len) > 0]
     log.add("vinhos", "remove sem nome/tipo/uva", len(df))
 
-    for col in ["elaborate", "body", "acidity", "country", "region", "winery"]:
-        df[col] = df[col].fillna("Desconhecido").astype(str).str.strip()
     df["abv"] = pd.to_numeric(df["abv"], errors="coerce")
     df = df[df["abv"].between(0.5, 25) | df["abv"].isna()]
-    df["abv"] = df["abv"].fillna(df.groupby("type")["abv"].transform("median"))
     log.add("vinhos", "remove destilados e ABV inválido (fora de 0,5–25%, ex.: grappas)", len(df))
+    return fill_attributes(df)
+
+
+def fill_attributes(items: pd.DataFrame, reference: pd.DataFrame | None = None) -> pd.DataFrame:
+    """Preenche atributos ausentes e calcula n_grapes/n_vintages. Usado na limpeza e ao
+    cadastrar vinhos novos; reference (o catálogo) fornece a mediana de ABV por tipo."""
+    df = items.copy()
+    ref = df if reference is None else reference
+    for col in ["type"] + CAT_COLS:
+        if col not in df:
+            df[col] = None
+        df[col] = df[col].fillna("Desconhecido").astype(str).str.strip()
+    for col in LIST_COLS:
+        if col not in df:
+            df[col] = None
+        df[col] = df[col].map(lambda v: list(v) if isinstance(v, (list, tuple, np.ndarray)) else [])
+    df["abv"] = pd.to_numeric(df["abv"], errors="coerce") if "abv" in df else np.nan
+    median_by_type = pd.to_numeric(ref["abv"], errors="coerce").groupby(ref["type"]).median()
+    df["abv"] = (df["abv"].fillna(df["type"].map(median_by_type))
+                 .fillna(pd.to_numeric(ref["abv"], errors="coerce").median()))
 
     # Safras misturam anos e 'N.V.' (sem safra): guardadas como texto.
     df["vintages"] = df["vintages"].map(lambda l: [str(v) for v in l])

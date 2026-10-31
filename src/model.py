@@ -23,6 +23,7 @@ import pandas as pd
 import scipy.sparse as sp
 from sklearn.preprocessing import normalize
 
+from src.data import fill_attributes
 from src.features import WineFeaturizer
 
 DISPLAY_COLS = ["item_id", "name", "winery", "type", "country", "region", "grapes", "abv"]
@@ -222,8 +223,14 @@ class ContentRecommender:
         return self._top(profile, self.item_pos[list(rated)].to_numpy() if rated else (), k, alpha, **filters)
 
     def add_items(self, new_items: pd.DataFrame) -> np.ndarray:
-        """Cenário 3: adiciona vinhos ao catálogo. Sem notas, a média bayesiana é a global (C)."""
-        new_items = new_items.reset_index(drop=True)
+        """Cenário 3: adiciona vinhos ao catálogo. Sem notas, a média bayesiana é a global (C).
+        Atributos ausentes são preenchidos; vinhos cujo item_id já está no catálogo são
+        ignorados (o app pode cadastrar o mesmo vinho de novo ao recarregar)."""
+        ids = new_items["item_id"].to_numpy()
+        new_items = fill_attributes(new_items.drop_duplicates("item_id"), reference=self.items)
+        new_items = new_items[~new_items["item_id"].isin(self.item_pos.index)].reset_index(drop=True)
+        if new_items.empty:
+            return ids
         X_new = self.featurizer.transform(new_items)
         self.X = sp.vstack([self.X, X_new], format="csr")
         self._set_items(pd.concat([self.items, new_items], ignore_index=True))
@@ -231,7 +238,7 @@ class ContentRecommender:
         self.wr = np.concatenate([self.wr, np.full(len(new_items), self.C)])
         self._update_product_score()
         self.seen = sp.hstack([self.seen, sp.csr_matrix((self.seen.shape[0], len(new_items)))], format="csr")
-        return new_items["item_id"].to_numpy()
+        return ids
 
     def user_affinity(self, sim: np.ndarray) -> np.ndarray:
         return self.gamma * sim + (1 - self.gamma) * self.user_activity

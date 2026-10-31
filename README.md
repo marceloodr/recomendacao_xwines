@@ -15,7 +15,7 @@ Base: [X-Wines](https://github.com/rogerioxavier/X-Wines) (de Azambuja, Morais &
 Coloque os CSVs `XWines_<versão>_*_wines.csv` e `XWines_<versão>_*_ratings.csv` em qualquer subpasta de `data/raw/`.
 O código usa a maior versão encontrada (Full > Slim > Test), ou a indicada em `--version`.
 
-- **Slim** (recomendada): [Kaggle](https://www.kaggle.com/datasets/rogerioxavier/x-wines-slim-version)
+- **Slim** (recomendada): [Kaggle](https://www.kaggle.com/datasets/rogerioxavier/x-wines-slim-version) — `scripts/download_data.sh` baixa para `data/raw/xwines_slim/` (requer `~/.kaggle/kaggle.json`)
 - **Test** (só para desenvolvimento): já em `data/raw/xwines_test/`, baixada do GitHub do autor
 
 Tratamento (gera `data/processed/*.parquet` e `cleaning_log.csv`):
@@ -38,4 +38,3 @@ Tratamento (gera `data/processed/*.parquet` e `cleaning_log.csv`):
 | `notebooks/02_modelo.ipynb` | split, vetorização e ajuste de hiperparâmetros (`data/processed/best_params.json`) |
 | `notebooks/03_avaliacao.ipynb` | métricas nos 3 cenários vs baselines, exemplos e modelo final (`models/recommender.pkl`) |
 | `app/` | interface Streamlit (a fazer) |
-| `_foodcom_antigo/` | versão anterior feita com a Food.com (base já escolhida por outro grupo) |

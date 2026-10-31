@@ -77,7 +77,7 @@ Candidatas com ratings por usuário **e** atributos de item:
 
 **Ideias de EDA específicas**: tipo, corpo e acidez (catálogo × notas); top uvas, harmonizações e países; nota média por tipo, país e uva; **idade do vinho no momento da avaliação × nota**; teor alcoólico × nota.
 
-**Código**: o que foi feito para a Food.com foi adaptado. Divisão, modelo, métricas, baselines e ajuste são genéricos (`item_id`). Carga, limpeza e vetorização foram reescritas para vinhos. O material da Food.com está em `_foodcom_antigo/`.
+**Código**: o que foi feito para a Food.com foi adaptado. Divisão, modelo, métricas, baselines e ajuste são genéricos (`item_id`). Carga, limpeza e vetorização foram reescritas para vinhos.
 
 ### 2.3 Grupo
 Definir os integrantes (até 5) e dividir as frentes: dados/EDA, modelo, avaliação, interface, slides.
