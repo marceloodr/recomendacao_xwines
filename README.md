@@ -37,4 +37,4 @@ Tratamento (gera `data/processed/*.parquet` e `cleaning_log.csv`):
 | `notebooks/01_eda.ipynb` | estatísticas descritivas e gráficos (figuras em `slides/figs/`) |
 | `notebooks/02_modelo.ipynb` | split, vetorização e ajuste de hiperparâmetros (`data/processed/best_params.json`) |
 | `notebooks/03_avaliacao.ipynb` | métricas nos 3 cenários vs baselines, exemplos e modelo final (`models/recommender.pkl`) |
-| `app/` | interface Streamlit (a fazer) |
+| `app/app.py` | interface Streamlit com os 3 cenários (`streamlit run app/app.py`; requer `models/recommender.pkl`) |
