@@ -26,6 +26,7 @@ from sklearn.preprocessing import normalize
 from src.data import fill_attributes
 from src.features import WineFeaturizer
 
+NEUTRAL_RATING = 3.0  # meio da escala 1–5: nota informada no onboarding acima disso conta a favor
 DISPLAY_COLS = ["item_id", "name", "winery", "type", "country", "region", "grapes", "abv"]
 _LABELS = {"grape": "uva", "harm": "combina com", "type": "tipo", "body": "corpo",
            "acidity": "acidez", "elaborate": "elaboração", "country": "país",
@@ -203,15 +204,18 @@ class ContentRecommender:
     def recommend_new_user(self, preferences: dict | None = None, rated: dict | None = None,
                            k: int = 10, **filters) -> pd.DataFrame:
         """Cenário 2: usuário novo. preferences vai para WineFeaturizer.transform_preferences
-        (uvas, harmonização, tipos, corpo, acidez, países); rated = {item_id: nota}.
-        Sem nenhuma informação, cai no ranking pelo escore de produto."""
+        (uvas, harmonização, tipos, corpo, acidez, países); rated = {item_id: nota}, com peso
+        nota − NEUTRAL_RATING. Sem nenhuma informação, cai no ranking pelo escore de produto."""
         parts = []
         if preferences and any(preferences.values()):
             parts.append(self.featurizer.transform_preferences(**preferences))
         rated = {i: v for i, v in (rated or {}).items() if i in self.item_pos.index}
         if rated:
-            df = pd.DataFrame({"user_id": 0, "item_id": list(rated), "rating": list(rated.values())})
-            parts.append(self._profiles(df)[1])
+            # Notas declaradas são centralizadas no meio da escala: acima de 3 aproxima,
+            # abaixo afasta. Com notas brutas (centered=False) e um vinho só, a normalização
+            # apagaria a nota, e um vinho com nota 1 traria vinhos parecidos com ele.
+            w = np.array(list(rated.values()), dtype=float) - NEUTRAL_RATING
+            parts.append(normalize(sp.csr_matrix(w) @ self.X[self.item_pos[list(rated)].to_numpy()]))
         if not parts:
             profile = sp.csr_matrix((1, self.X.shape[1]))
             score = self.product_score.copy()

@@ -7,5 +7,5 @@ seaborn>=0.13
 pyarrow>=15
 jupyter>=1.0
 nbconvert>=7.0
-streamlit>=1.35
+streamlit>=1.50
 kaggle>=1.6
