@@ -63,8 +63,8 @@ REC_COLS = {"name": "Vinho", "winery": "Vinícola", "porque": "Por que recomenda
             "nota_bayesiana": "Nota média*", "n_notas": "Nº notas"}
 NEW_COLS = {"name": "Vinho", "winery": "Vinícola", "porque": "Por que recomendamos",
             "type": "Tipo", "country": "País", "grapes": "Uvas", "similaridade": "Similaridade"}
-FAN_COLS = {"user_id": "Usuário", "porque": "Por que", "afinidade": "Afinidade",
-            "similaridade": "Similaridade"}
+FAN_COLS = {"user_id": "Usuário", "afinidade": "Afinidade", "similaridade": "Similaridade",
+            "porque": "Por que"}
 
 
 try:
@@ -252,4 +252,7 @@ with tab3:
             show(showcase, NEW_COLS)
         with r:
             st.markdown(f"**Outros usuários com afinidade com '{w['name']}'**")
-            show(model.recommend_new_item(sel, k), FAN_COLS)
+            fans = model.recommend_new_item(sel, k)
+            if model.gamma == 1:  # γ validado = 1: afinidade = similaridade, não repete a coluna
+                fans = fans.drop(columns="similaridade")
+            show(fans, FAN_COLS)
