@@ -101,7 +101,8 @@ st.caption("Sistema baseado em conteúdo + escore de produto (média bayesiana e
            "base X-Wines · *Nota média bayesiana: média das notas ajustada pelo nº de avaliações.")
 
 k = st.sidebar.slider("Quantidade de recomendações", 3, 20, 10)
-st.sidebar.markdown("**Filtros obrigatórios** (abas 1 e 2)")
+st.sidebar.markdown("**Filtros** (abas 1 e 2)",
+                    help="Removem da lista os vinhos que não atendem. Não se aplicam à aba 3.")
 f_types = st.sidebar.multiselect("Somente os tipos", types_all, placeholder="Todos")
 f_countries = st.sidebar.multiselect("Somente os países", countries_all, placeholder="Todos")
 f_avoid = st.sidebar.multiselect("Evitar as uvas", grapes_all, placeholder="Nenhuma")
